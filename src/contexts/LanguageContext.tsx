@@ -18,7 +18,12 @@ export const useLanguage = () => {
   return context;
 };
 
-const translations = {
+// Add this type for translation objects
+interface TranslationMap {
+  [key: string]: string;
+}
+
+const translations: { en: TranslationMap; am: TranslationMap } = {
   en: {
     // Navigation
     'nav.home': 'Home',
@@ -63,7 +68,7 @@ const translations = {
     'auth.demoPassword': 'Password: demo123',
     
     // App Title
-    'app.title': 'Project Management System',
+    'app.title': 'Ethiopian Project Management System',
     'app.subtitle': 'Comprehensive solution for managing and analyzing project data',
     
     // Dashboard
@@ -152,7 +157,9 @@ const translations = {
     'nav.dashboard': 'ዳሽቦርድ',
     'nav.projects': 'ፕሮጀክቶች',
     'nav.analytics': 'ትንተና',
-    
+    //gender
+    'form.employeesMale': 'ወንድ ሰራተኞች ',
+    'form.employeesFemale': 'ሴት ሰራተኞች',
     // Common
     'common.loading': 'እየተጫነ ነው...',
     'common.save': 'አስቀምጥ',
@@ -247,8 +254,7 @@ const translations = {
     'form.companyEmail': 'የኩባንያ ኢሜይል',
     'form.companyWebsite': 'የኩባንያ ድረ-ገጽ',
     'form.projectStatus': 'የፕሮጀክት ሁኔታ',
-    'form.employeesMale': 'ወንድ ሰራተኞች',
-    'form.employeesFemale': 'ሴት ሰራተኞች',
+   
     'form.employeesTotal': 'ጠቅላላ ሰራተኞች',
     'form.employeeInfo': 'የሰራተኛ መረጃ',
     'form.createProject': 'ፕሮጀክት ፍጠር',
@@ -274,6 +280,13 @@ const translations = {
     'home.viewAnalytics': 'ትንተና ይመልከቱ',
   }
 };
+
+// Add missing Amharic keys after definition
+Object.keys(translations.en).forEach(key => {
+  if (!(key in translations.am)) {
+    translations.am[key] = translations.en[key];
+  }
+});
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('en');

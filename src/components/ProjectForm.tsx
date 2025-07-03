@@ -12,6 +12,77 @@ interface ProjectFormProps {
   onCancel: () => void;
 }
 
+// Cleaned InputFieldProps and InputField
+interface InputFieldProps {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+  options?: string[] | null;
+  value: any;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  error?: string;
+  isDark: boolean;
+  readOnly?: boolean;
+}
+
+const InputField: React.FC<InputFieldProps> = ({ 
+  label, 
+  name, 
+  type = 'text', 
+  required = false, 
+  options = null,
+  value,
+  onChange,
+  error,
+  isDark,
+  readOnly = false
+}) => (
+  <div>
+    <label className={`block text-sm font-medium mb-1 transition-colors ${
+      isDark ? 'text-gray-200' : 'text-gray-700'
+    }`}>
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    {options ? (
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className={`w-full px-3 py-2 border rounded-md transition-colors focus:ring-2 focus:ring-offset-2 ${
+          error 
+            ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+            : isDark 
+              ? 'bg-gray-800 border-gray-600 text-white focus:border-white focus:ring-white' 
+              : 'bg-white border-gray-300 text-black focus:border-black focus:ring-black'
+        }`}
+      >
+        <option value="">Select {label}</option>
+        {options.map(option => (
+          <option key={option} value={option}>{option}</option>
+        ))}
+      </select>
+    ) : (
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        readOnly={readOnly}
+        className={`w-full px-3 py-2 border rounded-md transition-colors focus:ring-2 focus:ring-offset-2 ${
+          error 
+            ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+            : isDark 
+              ? 'bg-gray-800 border-gray-600 text-white focus:border-white focus:ring-white' 
+              : 'bg-white border-gray-300 text-black focus:border-black focus:ring-black'
+        } ${readOnly ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed' : ''}`}
+        min={type === 'number' ? '0' : undefined}
+      />
+    )}
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+  </div>
+);
+
 const ProjectForm: React.FC<ProjectFormProps> = ({ project, metadata, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     companyName: '',
@@ -35,6 +106,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, metadata, onSubmit, 
     employeesTotal: 0,
   });
 
+  const [otherSubSector, setOtherSubSector] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [duplicateWarning, setDuplicateWarning] = useState<string>('');
@@ -62,7 +134,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, metadata, onSubmit, 
       setFormData({
         companyName: project.companyName,
         sector: project.sector,
-        subSector: project.subSector,
+        subSector: project.subSector === 'Other' ? 'Other' : project.subSector,
         region: project.region,
         zone: project.zone,
         woreda: project.woreda,
@@ -80,8 +152,15 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, metadata, onSubmit, 
         employeesFemale: project.employeesFemale,
         employeesTotal: project.employeesTotal,
       });
+
+      
+      // If the project's subSector is not in the predefined list, treat it as "Other"
+      if (project.subSector && !metadata?.subSectors.includes(project.subSector)) {
+        setOtherSubSector(project.subSector);
+        setFormData(prev => ({ ...prev, subSector: 'Other' }));
+      }
     }
-  }, [project]);
+  }, [project, metadata]);
 
   // Check for duplicates when key fields change
   useEffect(() => {
@@ -120,12 +199,25 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, metadata, onSubmit, 
         newData.employeesTotal = male + female;
       }
       
+      // Clear other sub-sector when changing away from "Other"
+      if (name === 'subSector' && value !== 'Other') {
+        setOtherSubSector('');
+      }
+      
       return newData;
     });
     
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleOtherSubSectorChange = (value: string) => {
+    setOtherSubSector(value);
+    // Clear error when user starts typing
+    if (errors.subSector) {
+      setErrors(prev => ({ ...prev, subSector: '' }));
     }
   };
 
@@ -162,12 +254,19 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, metadata, onSubmit, 
     
     try {
       setLoading(true);
+      
+      // Prepare the data for submission
+      const submitData = {
+        ...formData,
+        subSector: formData.subSector === 'Other' ? otherSubSector : formData.subSector
+      };
+      
       let result;
       
       if (project) {
-        result = await updateProject(project.id, formData);
+        result = await updateProject(project.id, submitData);
       } else {
-        result = await createProject(formData);
+        result = await createProject(submitData);
       }
       
       onSubmit(result);
@@ -178,64 +277,6 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, metadata, onSubmit, 
       setLoading(false);
     }
   };
-
-  const InputField = ({ 
-    label, 
-    name, 
-    type = 'text', 
-    required = false, 
-    options = null 
-  }: { 
-    label: string; 
-    name: string; 
-    type?: string; 
-    required?: boolean; 
-    options?: string[] | null;
-  }) => (
-    <div>
-      <label className={`block text-sm font-medium mb-1 transition-colors ${
-        isDark ? 'text-gray-200' : 'text-gray-700'
-      }`}>
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {options ? (
-        <select
-          name={name}
-          value={formData[name as keyof typeof formData]}
-          onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md transition-colors focus:ring-2 focus:ring-offset-2 ${
-            errors[name] 
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-              : isDark 
-                ? 'bg-gray-800 border-gray-600 text-white focus:border-white focus:ring-white' 
-                : 'bg-white border-gray-300 text-black focus:border-black focus:ring-black'
-          }`}
-        >
-          <option value="">Select {label}</option>
-          {options.map(option => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type={type}
-          name={name}
-          value={formData[name as keyof typeof formData]}
-          onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-md transition-colors focus:ring-2 focus:ring-offset-2 ${
-            errors[name] 
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-              : isDark 
-                ? 'bg-gray-800 border-gray-600 text-white focus:border-white focus:ring-white' 
-                : 'bg-white border-gray-300 text-black focus:border-black focus:ring-black'
-          }`}
-          min={type === 'number' ? '0' : undefined}
-          readOnly={name === 'employeesTotal'}
-        />
-      )}
-      {errors[name] && <p className="text-red-500 text-sm mt-1">{errors[name]}</p>}
-    </div>
-  );
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 backdrop-blur-sm">
@@ -320,85 +361,163 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, metadata, onSubmit, 
               label={t('form.companyName')} 
               name="companyName" 
               required 
+              value={formData.companyName}
+              onChange={handleChange}
+              error={errors.companyName}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.owner')} 
               name="owner" 
               required 
+              value={formData.owner}
+              onChange={handleChange}
+              error={errors.owner}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.sector')} 
               name="sector" 
               required 
               options={metadata?.sectors}
+              value={formData.sector}
+              onChange={handleChange}
+              error={errors.sector}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.subSector')} 
               name="subSector" 
               required 
               options={metadata?.subSectors}
+              value={formData.subSector}
+              onChange={handleChange}
+              error={errors.subSector}
+              isDark={isDark}
             />
+            {formData.subSector === 'Other' && (
+              <input
+                type="text"
+                placeholder="Please specify..."
+                value={otherSubSector}
+                onChange={e => handleOtherSubSectorChange(e.target.value)}
+                className={`w-full px-3 py-2 border rounded-md transition-colors focus:ring-2 focus:ring-offset-2 mt-2 ${
+                  isDark 
+                    ? 'bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-white focus:ring-white' 
+                    : 'bg-white border-gray-300 text-black placeholder-gray-500 focus:border-black focus:ring-black'
+                }`}
+                required
+              />
+            )}
             <InputField 
               label={t('form.region')} 
               name="region" 
               required 
               options={metadata?.regions}
+              value={formData.region}
+              onChange={handleChange}
+              error={errors.region}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.zone')} 
               name="zone" 
               required 
+              value={formData.zone}
+              onChange={handleChange}
+              error={errors.zone}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.woreda')} 
               name="woreda" 
               required 
+              value={formData.woreda}
+              onChange={handleChange}
+              error={errors.woreda}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.approvalDate')} 
               name="approvalDate" 
               type="date" 
               required 
+              value={formData.approvalDate}
+              onChange={handleChange}
+              error={errors.approvalDate}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.projectStatus')} 
               name="projectStatus" 
               required 
               options={metadata?.projectStatuses}
+              value={formData.projectStatus}
+              onChange={handleChange}
+              error={errors.projectStatus}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.contactPerson')} 
               name="contactPerson" 
               required 
+              value={formData.contactPerson}
+              onChange={handleChange}
+              error={errors.contactPerson}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.ownerPhone')} 
               name="ownerPhone" 
               type="tel" 
               required 
+              value={formData.ownerPhone}
+              onChange={handleChange}
+              error={errors.ownerPhone}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.companyEmail')} 
               name="companyEmail" 
               type="email" 
               required 
+              value={formData.companyEmail}
+              onChange={handleChange}
+              error={errors.companyEmail}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.companyWebsite')} 
               name="companyWebsite" 
               type="url" 
+              value={formData.companyWebsite}
+              onChange={handleChange}
+              error={errors.companyWebsite}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.advisorCompany')} 
               name="advisorCompany" 
+              value={formData.advisorCompany}
+              onChange={handleChange}
+              error={errors.advisorCompany}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.evaluator')} 
               name="evaluator" 
+              value={formData.evaluator}
+              onChange={handleChange}
+              error={errors.evaluator}
+              isDark={isDark}
             />
             <InputField 
               label={t('form.grantedBy')} 
               name="grantedBy" 
+              value={formData.grantedBy}
+              onChange={handleChange}
+              error={errors.grantedBy}
+              isDark={isDark}
             />
           </div>
           
@@ -415,16 +534,29 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ project, metadata, onSubmit, 
                 label={t('form.employeesMale')} 
                 name="employeesMale" 
                 type="number" 
+                value={formData.employeesMale}
+                onChange={handleChange}
+                error={errors.employeesMale}
+                isDark={isDark}
               />
               <InputField 
                 label={t('form.employeesFemale')} 
                 name="employeesFemale" 
                 type="number" 
+                value={formData.employeesFemale}
+                onChange={handleChange}
+                error={errors.employeesFemale}
+                isDark={isDark}
               />
               <InputField 
                 label={t('form.employeesTotal')} 
                 name="employeesTotal" 
                 type="number" 
+                value={formData.employeesTotal}
+                onChange={handleChange}
+                error={errors.employeesTotal}
+                isDark={isDark}
+                readOnly={true}
               />
             </div>
           </div>

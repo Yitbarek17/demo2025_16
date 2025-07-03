@@ -81,7 +81,7 @@
     "sectors": ["Health", "Industry", "Agriculture"],
     "subSectors": [
       "Agroprocessing", "Food and Beverage", "Construction and Engineering",
-      "Chemical and Detergents", "Textile and Garment", "Multi-Sectorial", "Minerals"
+      "Chemical and Detergents", "Textile and Garment", "Other", "Minerals", "Other"
     ],
     "projectStatuses": ["Planning", "In Progress", "Completed", "On Hold", "Cancelled"]
   }

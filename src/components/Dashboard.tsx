@@ -29,7 +29,7 @@ const Dashboard: React.FC<DashboardProps> = ({ projects, metadata }) => {
     value: projects.filter(p => p.projectStatus === status).length
   })) || [];
 
-  const regionData = metadata?.regions.slice(0, 8).map(region => ({
+  const regionData = metadata?.regions.map(region => ({
     name: region,
     projects: projects.filter(p => p.region === region).length,
     employees: projects.filter(p => p.region === region).reduce((sum, p) => sum + p.employeesTotal, 0)
