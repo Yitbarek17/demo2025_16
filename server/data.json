@@ -1,0 +1,88 @@
+{
+  "projects": [
+    {
+      "id": "1",
+      "companyName": "Ethiopian Health Solutions",
+      "sector": "Health",
+      "subSector": "Multi-Sectorial",
+      "region": "Addis Ababa",
+      "zone": "Addis Ababa Zone",
+      "woreda": "Kirkos",
+      "approvalDate": "2024-01-15",
+      "owner": "Dr. Almaz Tesfaye",
+      "advisorCompany": "Health Tech Advisors",
+      "evaluator": "Ministry of Health",
+      "grantedBy": "Development Bank of Ethiopia",
+      "contactPerson": "Almaz Tesfaye",
+      "ownerPhone": "+251911234567",
+      "companyEmail": "info@ethealthsolutions.com",
+      "companyWebsite": "https://ethealthsolutions.com",
+      "projectStatus": "In Progress",
+      "employeesMale": 45,
+      "employeesFemale": 38,
+      "employeesTotal": 83,
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "companyName": "Oromia Agricultural Processing",
+      "sector": "Agriculture",
+      "subSector": "Agroprocessing",
+      "region": "Oromia",
+      "zone": "West Shewa",
+      "woreda": "Ambo",
+      "approvalDate": "2024-02-20",
+      "owner": "Ato Bekele Megersa",
+      "advisorCompany": "Agro Business Consultants",
+      "evaluator": "Ministry of Agriculture",
+      "grantedBy": "Commercial Bank of Ethiopia",
+      "contactPerson": "Bekele Megersa",
+      "ownerPhone": "+251922345678",
+      "companyEmail": "contact@oroagriprocessing.com",
+      "companyWebsite": "https://oroagriprocessing.com",
+      "projectStatus": "Completed",
+      "employeesMale": 62,
+      "employeesFemale": 48,
+      "employeesTotal": 110,
+      "createdAt": "2024-02-01T00:00:00.000Z",
+      "updatedAt": "2024-02-20T00:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "companyName": "Amhara Textile Manufacturing",
+      "sector": "Industry",
+      "subSector": "Textile and Garment",
+      "region": "Amhara",
+      "zone": "South Gondar",
+      "woreda": "Debre Tabor",
+      "approvalDate": "2024-03-10",
+      "owner": "W/ro Tigist Alemayehu",
+      "advisorCompany": "Industrial Development Corp",
+      "evaluator": "Ministry of Industry",
+      "grantedBy": "Development Bank of Ethiopia",
+      "contactPerson": "Tigist Alemayehu",
+      "ownerPhone": "+251933456789",
+      "companyEmail": "info@amharatextile.com",
+      "companyWebsite": "https://amharatextile.com",
+      "projectStatus": "Planning",
+      "employeesMale": 120,
+      "employeesFemale": 180,
+      "employeesTotal": 300,
+      "createdAt": "2024-03-01T00:00:00.000Z",
+      "updatedAt": "2024-03-10T00:00:00.000Z"
+    }
+  ],
+  "metadata": {
+    "regions": [
+      "Addis Ababa", "Afar", "Amhara", "Benishangul-Gumuz", "Dire Dawa",
+      "Gambela", "Harari", "Oromia", "Sidama", "SNNP", "Somali", "Tigray", "Southwest", "Central Ethiopia"
+    ],
+    "sectors": ["Health", "Industry", "Agriculture"],
+    "subSectors": [
+      "Agroprocessing", "Food and Beverage", "Construction and Engineering",
+      "Chemical and Detergents", "Textile and Garment", "Multi-Sectorial", "Minerals"
+    ],
+    "projectStatuses": ["Planning", "In Progress", "Completed", "On Hold", "Cancelled"]
+  }
+}
